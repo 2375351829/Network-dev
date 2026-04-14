@@ -15,7 +15,8 @@ const navLinks = [
   { name: '聊天', path: '/chat', icon: '💬' },
   { name: '多媒体', path: '/multimedia', icon: '🎵' },
   { name: '备份', path: '/backup', icon: '💾' },
-  { name: '通知', path: '/notification', icon: '🔔' }
+  { name: '通知', path: '/notification', icon: '🔔' },
+  { name: '用户管理', path: '/users', icon: '👥' }
 ]
 
 const currentRoute = computed(() => route.path)
