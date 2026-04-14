@@ -60,33 +60,21 @@ function copyLink(link) {
       console.error('复制失败:', err)
     })
 }
-
-function logout() {
-  authStore.logout()
-  router.push('/login')
-}
 </script>
 
 <template>
   <div class="share-container">
-    <header class="share-header">
-      <h1>共享设置</h1>
-      <div class="header-actions">
-        <router-link to="/files" class="nav-link">文件管理</router-link>
-        <router-link to="/chat" class="nav-link">聊天</router-link>
-        <button @click="logout" class="logout-button">退出登录</button>
-      </div>
-    </header>
+    <h1>共享设置</h1>
     
-    <div class="create-share-section">
-      <h2>创建共享</h2>
-      <div class="create-share-form">
-        <div class="form-group">
-          <label for="file-select">选择文件</label>
+    <div class="card mb-lg">
+      <h2 class="mb-md">创建共享</h2>
+      <div class="max-w-md">
+        <div class="form-group mb-md">
+          <label for="file-select" class="form-label">选择文件</label>
           <select 
             id="file-select" 
             v-model="selectedFileId" 
-            class="file-select"
+            class="form-input"
           >
             <option value="">请选择文件</option>
             <option v-for="file in filesStore.files" :key="file.id" :value="file.id">
@@ -94,28 +82,33 @@ function logout() {
             </option>
           </select>
         </div>
-        <div class="form-group">
-          <label for="expires-at">过期时间</label>
+        <div class="form-group mb-md">
+          <label for="expires-at" class="form-label">过期时间</label>
           <input 
             type="datetime-local" 
             id="expires-at" 
             v-model="expiresAt" 
-            class="expires-input"
+            class="form-input"
           />
         </div>
         <button 
           @click="handleCreateShare" 
           :disabled="shareStore.loading" 
-          class="create-share-button"
+          class="btn btn-primary"
         >
           {{ shareStore.loading ? '创建中...' : '创建共享' }}
         </button>
       </div>
     </div>
     
-    <div class="shares-list">
-      <h2>共享列表</h2>
-      <table class="shares-table">
+    <div class="card">
+      <h2 class="mb-md">共享列表</h2>
+      
+      <div v-if="shareStore.loading" class="loading">
+        加载中...
+      </div>
+      
+      <table v-else class="w-full">
         <thead>
           <tr>
             <th>文件名</th>
@@ -127,23 +120,27 @@ function logout() {
         <tbody>
           <tr v-for="share in shareStore.shares" :key="share.id">
             <td>{{ share.file.filename }}</td>
-            <td>
-              <div class="share-link">
-                <span>{{ share.share_url }}</span>
-                <button @click="copyLink(share.share_url)" class="copy-button">复制</button>
-              </div>
+            <td class="flex items-center gap-sm">
+              <span class="flex-1 text-sm break-all">{{ share.share_url }}</span>
+              <button @click="copyLink(share.share_url)" class="btn btn-sm btn-secondary">复制</button>
             </td>
             <td>{{ new Date(share.expires_at).toLocaleString() }}</td>
-            <td class="share-actions">
-              <button @click="handleDeleteShare(share.id)" class="action-button delete">删除</button>
+            <td>
+              <button @click="handleDeleteShare(share.id)" class="btn btn-sm btn-danger">删除</button>
             </td>
           </tr>
         </tbody>
       </table>
-      <p v-if="shareStore.shares.length === 0" class="empty-message">暂无共享</p>
+      
+      <div v-if="shareStore.shares.length === 0 && !shareStore.loading" class="empty-state">
+        <h3>暂无共享</h3>
+        <p>创建您的第一个文件共享链接</p>
+      </div>
     </div>
     
-    <p v-if="error" class="error-message">{{ error }}</p>
+    <div v-if="error" class="error-message mt-md">
+      {{ error }}
+    </div>
   </div>
 </template>
 
@@ -151,231 +148,5 @@ function logout() {
 .share-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
-}
-
-.share-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #ddd;
-}
-
-.share-header h1 {
-  color: #333;
-  margin: 0;
-}
-
-.header-actions {
-  display: flex;
-  gap: 15px;
-  align-items: center;
-}
-
-.nav-link {
-  color: #42b883;
-  text-decoration: none;
-  font-size: 16px;
-  font-weight: 500;
-  transition: color 0.3s;
-}
-
-.nav-link:hover {
-  color: #35495e;
-}
-
-.logout-button {
-  padding: 8px 16px;
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.logout-button:hover {
-  background-color: #c0392b;
-}
-
-.create-share-section {
-  margin-bottom: 30px;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.create-share-section h2 {
-  color: #333;
-  margin-bottom: 15px;
-  font-size: 18px;
-}
-
-.create-share-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  max-width: 600px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #555;
-}
-
-.file-select,
-.expires-input {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 16px;
-}
-
-.file-select:focus,
-.expires-input:focus {
-  outline: none;
-  border-color: #42b883;
-  box-shadow: 0 0 0 2px rgba(66, 184, 131, 0.2);
-}
-
-.create-share-button {
-  padding: 12px;
-  background-color: #42b883;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  align-self: flex-start;
-}
-
-.create-share-button:hover {
-  background-color: #35495e;
-}
-
-.create-share-button:disabled {
-  background-color: #95a5a6;
-  cursor: not-allowed;
-}
-
-.shares-list {
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  padding: 20px;
-}
-
-.shares-list h2 {
-  color: #333;
-  margin-bottom: 15px;
-  font-size: 18px;
-}
-
-.shares-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: white;
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.shares-table th,
-.shares-table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-}
-
-.shares-table th {
-  background-color: #f5f5f5;
-  font-weight: 600;
-  color: #555;
-}
-
-.shares-table tr:hover {
-  background-color: #f9f9f9;
-}
-
-.share-link {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.share-link span {
-  flex: 1;
-  font-size: 14px;
-  color: #333;
-  word-break: break-all;
-}
-
-.copy-button {
-  padding: 4px 8px;
-  background-color: #3498db;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.copy-button:hover {
-  background-color: #2980b9;
-}
-
-.share-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.action-button.delete {
-  padding: 6px 12px;
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.action-button.delete:hover {
-  background-color: #c0392b;
-}
-
-.empty-message {
-  text-align: center;
-  color: #7f8c8d;
-  padding: 20px;
-  background-color: white;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.error-message {
-  color: #e74c3c;
-  font-size: 14px;
-  text-align: center;
-  margin-top: 20px;
-  padding: 10px;
-  background-color: #fadbd8;
-  border-radius: 4px;
 }
 </style>

@@ -3,41 +3,41 @@
     <h1>备份管理</h1>
     
     <!-- 备份状态 -->
-    <div class="backup-status">
-      <h2>备份状态</h2>
+    <div class="card mb-lg">
+      <h2 class="mb-md">备份状态</h2>
       <div v-if="loading" class="loading">加载中...</div>
       <div v-else class="status-info">
-        <p>状态: {{ backupStatus.status }}</p>
-        <p v-if="backupStatus.last_backup">最后备份: {{ formatDateTime(backupStatus.last_backup) }}</p>
+        <p class="mb-sm">状态: {{ backupStatus.status }}</p>
+        <p v-if="backupStatus.last_backup" class="mb-sm">最后备份: {{ formatDateTime(backupStatus.last_backup) }}</p>
         <p v-if="backupStatus.next_backup">下次备份: {{ formatDateTime(backupStatus.next_backup) }}</p>
       </div>
     </div>
     
     <!-- 备份配置 -->
-    <div class="backup-config">
-      <h2>备份配置</h2>
+    <div class="card mb-lg">
+      <h2 class="mb-md">备份配置</h2>
       <form @submit.prevent="updateConfig">
-        <div class="form-group">
-          <label>
-            <input type="checkbox" v-model="config.enabled">
+        <div class="form-group mb-md">
+          <label class="flex items-center gap-sm">
+            <input type="checkbox" v-model="config.enabled" class="mr-sm">
             启用自动备份
           </label>
         </div>
-        <div class="form-group">
-          <label>备份间隔</label>
-          <select v-model="config.interval">
+        <div class="form-group mb-md">
+          <label for="interval" class="form-label">备份间隔</label>
+          <select id="interval" v-model="config.interval" class="form-input">
             <option value="daily">每天</option>
             <option value="weekly">每周</option>
             <option value="monthly">每月</option>
           </select>
         </div>
-        <div class="form-group">
-          <label>备份路径</label>
-          <input type="text" v-model="config.backup_path" placeholder="备份文件存储路径">
+        <div class="form-group mb-md">
+          <label for="backup_path" class="form-label">备份路径</label>
+          <input type="text" id="backup_path" v-model="config.backup_path" placeholder="备份文件存储路径" class="form-input">
         </div>
-        <div class="form-group">
-          <label>
-            <input type="checkbox" v-model="config.include_all_users">
+        <div class="form-group mb-md">
+          <label class="flex items-center gap-sm">
+            <input type="checkbox" v-model="config.include_all_users" class="mr-sm">
             包含所有用户文件
           </label>
         </div>
@@ -46,18 +46,21 @@
     </div>
     
     <!-- 手动备份 -->
-    <div class="manual-backup">
-      <h2>手动备份</h2>
+    <div class="card mb-lg">
+      <h2 class="mb-md">手动备份</h2>
       <button @click="runBackup" class="btn btn-success" :disabled="backupStatus.status === 'running'">
         {{ backupStatus.status === 'running' ? '备份中...' : '立即备份' }}
       </button>
     </div>
     
     <!-- 备份历史 -->
-    <div class="backup-history">
-      <h2>备份历史</h2>
-      <div v-if="backups.length === 0" class="no-data">暂无备份记录</div>
-      <table v-else class="backup-table">
+    <div class="card">
+      <h2 class="mb-md">备份历史</h2>
+      <div v-if="backups.length === 0" class="empty-state">
+        <h3>暂无备份记录</h3>
+        <p>运行第一次备份开始记录</p>
+      </div>
+      <table v-else class="w-full">
         <thead>
           <tr>
             <th>备份名称</th>
@@ -175,124 +178,9 @@ onMounted(async () => {
 .backup-container {
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
 }
 
-h1 {
-  text-align: center;
-  margin-bottom: 30px;
-  color: #333;
-}
-
-h2 {
-  margin-top: 30px;
-  margin-bottom: 15px;
-  color: #555;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 5px;
-}
-
-.backup-status, .backup-config, .manual-backup, .backup-history {
-  background: #f9f9f9;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.status-info p {
-  margin: 10px 0;
-  font-size: 16px;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
-}
-
-.form-group input[type="text"],
-.form-group select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.form-group input[type="checkbox"] {
-  margin-right: 8px;
-}
-
-.btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: background-color 0.3s;
-}
-
-.btn-primary {
-  background-color: #007bff;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #0069d9;
-}
-
-.btn-success {
-  background-color: #28a745;
-  color: white;
-}
-
-.btn-success:hover {
-  background-color: #218838;
-}
-
-.btn:disabled {
-  background-color: #6c757d;
-  cursor: not-allowed;
-}
-
-.backup-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-.backup-table th,
-.backup-table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-}
-
-.backup-table th {
-  background-color: #f2f2f2;
-  font-weight: 600;
-}
-
-.backup-table tr:hover {
-  background-color: #f5f5f5;
-}
-
-.loading {
-  text-align: center;
-  padding: 20px;
-  color: #666;
-}
-
-.no-data {
-  text-align: center;
-  padding: 30px;
-  color: #999;
-  font-style: italic;
+.mr-sm {
+  margin-right: var(--spacing-sm);
 }
 </style>

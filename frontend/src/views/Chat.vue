@@ -39,53 +39,48 @@ function scrollToBottom() {
     messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
   }
 }
-
-function logout() {
-  authStore.logout()
-  router.push('/login')
-}
 </script>
 
 <template>
   <div class="chat-container">
-    <header class="chat-header">
-      <h1>聊天</h1>
-      <div class="header-actions">
-        <router-link to="/files" class="nav-link">文件管理</router-link>
-        <router-link to="/share" class="nav-link">共享设置</router-link>
-        <button @click="logout" class="logout-button">退出登录</button>
-      </div>
-    </header>
+    <h1>聊天</h1>
     
-    <div class="messages-container" ref="messagesContainer">
-      <div v-for="message in chatStore.messages" :key="message.id" class="message">
-        <div class="message-header">
-          <span class="message-username">{{ message.user.username }}</span>
-          <span class="message-time">{{ new Date(message.created_at).toLocaleString() }}</span>
+    <div class="card flex-1 mb-lg">
+      <div class="messages-container" ref="messagesContainer">
+        <div v-for="message in chatStore.messages" :key="message.id" class="message">
+          <div class="message-header">
+            <span class="message-username">{{ message.user.username }}</span>
+            <span class="message-time">{{ new Date(message.created_at).toLocaleString() }}</span>
+          </div>
+          <div class="message-content">{{ message.content }}</div>
         </div>
-        <div class="message-content">{{ message.content }}</div>
+        <div v-if="chatStore.messages.length === 0" class="empty-state">
+          <h3>暂无消息</h3>
+          <p>发送您的第一条消息</p>
+        </div>
       </div>
-      <div v-if="chatStore.messages.length === 0" class="empty-message">暂无消息</div>
     </div>
     
-    <div class="message-input-section">
+    <div class="flex gap-md">
       <input 
         type="text" 
         v-model="messageInput" 
         @keyup.enter="handleSendMessage" 
         placeholder="输入消息..." 
-        class="message-input"
+        class="form-input flex-1"
       />
       <button 
         @click="handleSendMessage" 
         :disabled="chatStore.loading" 
-        class="send-button"
+        class="btn btn-primary"
       >
         {{ chatStore.loading ? '发送中...' : '发送' }}
       </button>
     </div>
     
-    <p v-if="error" class="error-message">{{ error }}</p>
+    <div v-if="error" class="error-message mt-md">
+      {{ error }}
+    </div>
   </div>
 </template>
 
@@ -93,159 +88,47 @@ function logout() {
 .chat-container {
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
   height: 80vh;
   display: flex;
   flex-direction: column;
 }
 
-.chat-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #ddd;
-}
-
-.chat-header h1 {
-  color: #333;
-  margin: 0;
-}
-
-.header-actions {
-  display: flex;
-  gap: 15px;
-  align-items: center;
-}
-
-.nav-link {
-  color: #42b883;
-  text-decoration: none;
-  font-size: 16px;
-  font-weight: 500;
-  transition: color 0.3s;
-}
-
-.nav-link:hover {
-  color: #35495e;
-}
-
-.logout-button {
-  padding: 8px 16px;
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.logout-button:hover {
-  background-color: #c0392b;
-}
-
 .messages-container {
-  flex: 1;
+  height: 100%;
   overflow-y: auto;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  padding: var(--spacing-lg);
 }
 
 .message {
-  margin-bottom: 15px;
-  padding: 10px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--background);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
 }
 
 .message-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 5px;
+  margin-bottom: var(--spacing-xs);
 }
 
 .message-username {
   font-weight: 600;
-  color: #333;
-  font-size: 14px;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
 }
 
 .message-time {
-  font-size: 12px;
-  color: #7f8c8d;
+  font-size: var(--font-size-xs);
+  color: var(--text-light);
 }
 
 .message-content {
-  font-size: 16px;
-  color: #333;
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
   line-height: 1.5;
-}
-
-.empty-message {
-  text-align: center;
-  color: #7f8c8d;
-  padding: 40px;
-  font-size: 16px;
-}
-
-.message-input-section {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.message-input {
-  flex: 1;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 16px;
-  resize: none;
-}
-
-.message-input:focus {
-  outline: none;
-  border-color: #42b883;
-  box-shadow: 0 0 0 2px rgba(66, 184, 131, 0.2);
-}
-
-.send-button {
-  padding: 12px 24px;
-  background-color: #42b883;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.send-button:hover {
-  background-color: #35495e;
-}
-
-.send-button:disabled {
-  background-color: #95a5a6;
-  cursor: not-allowed;
-}
-
-.error-message {
-  color: #e74c3c;
-  font-size: 14px;
-  text-align: center;
-  margin-top: 10px;
-  padding: 10px;
-  background-color: #fadbd8;
-  border-radius: 4px;
 }
 
 /* 滚动条样式 */
@@ -254,16 +137,16 @@ function logout() {
 }
 
 .messages-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+  background: var(--background-light);
+  border-radius: var(--radius-sm);
 }
 
 .messages-container::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
+  background: var(--background-dark);
+  border-radius: var(--radius-sm);
 }
 
 .messages-container::-webkit-scrollbar-thumb:hover {
-  background: #a1a1a1;
+  background: var(--text-light);
 }
 </style>

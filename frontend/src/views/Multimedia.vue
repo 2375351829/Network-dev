@@ -191,7 +191,7 @@ function openAddToPlaylistModal(file) {
     <h1>多媒体娱乐</h1>
     
     <!-- 标签页 -->
-    <div class="tabs">
+    <div class="tabs mb-lg">
       <button 
         :class="{ active: activeTab === 'music' }" 
         @click="activeTab = 'music'"
@@ -213,29 +213,29 @@ function openAddToPlaylistModal(file) {
     </div>
     
     <!-- 操作按钮 -->
-    <div class="action-buttons">
-      <button @click="showUploadModal = true" class="btn-primary">
+    <div class="flex gap-md mb-lg">
+      <button @click="showUploadModal = true" class="btn btn-primary">
         上传媒体
       </button>
-      <button v-if="activeTab === 'playlists'" @click="showCreatePlaylistModal = true" class="btn-secondary">
+      <button v-if="activeTab === 'playlists'" @click="showCreatePlaylistModal = true" class="btn btn-secondary">
         创建歌单
       </button>
     </div>
     
     <!-- 音乐标签页 -->
-    <div v-if="activeTab === 'music'" class="media-list">
-      <h2>音乐列表</h2>
-      <div class="file-grid">
-        <div v-for="file in musicFiles" :key="file.id" class="file-card">
-          <div class="file-info">
-            <h3>{{ file.filename }}</h3>
-            <p>{{ (file.file_size).toFixed(2) }} MB</p>
+    <div v-if="activeTab === 'music'">
+      <h2 class="mb-md">音乐列表</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
+        <div v-for="file in musicFiles" :key="file.id" class="card">
+          <div class="file-info mb-md">
+            <h3 class="mb-sm">{{ file.filename }}</h3>
+            <p class="text-secondary">{{ (file.file_size).toFixed(2) }} MB</p>
           </div>
-          <div class="file-actions">
-            <button @click="playMusic(file)" class="btn-play">
+          <div class="flex gap-sm">
+            <button @click="playMusic(file)" class="btn btn-sm" style="background-color: var(--secondary); color: white;">
               播放
             </button>
-            <button @click="openAddToPlaylistModal(file)" class="btn-add">
+            <button @click="openAddToPlaylistModal(file)" class="btn btn-sm" style="background-color: var(--accent); color: white;">
               添加到歌单
             </button>
           </div>
@@ -243,26 +243,26 @@ function openAddToPlaylistModal(file) {
       </div>
       
       <!-- 当前播放 -->
-      <div v-if="currentPlaying" class="now-playing">
+      <div v-if="currentPlaying" class="card mt-lg">
         <h3>当前播放: {{ currentPlaying.filename }}</h3>
         <!-- 实际项目中可以添加音频播放器控件 -->
       </div>
     </div>
     
     <!-- 视频标签页 -->
-    <div v-if="activeTab === 'video'" class="media-list">
-      <h2>视频列表</h2>
-      <div class="file-grid">
-        <div v-for="file in videoFiles" :key="file.id" class="file-card">
-          <div class="file-info">
-            <h3>{{ file.filename }}</h3>
-            <p>{{ (file.file_size).toFixed(2) }} MB</p>
+    <div v-if="activeTab === 'video'">
+      <h2 class="mb-md">视频列表</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
+        <div v-for="file in videoFiles" :key="file.id" class="card">
+          <div class="file-info mb-md">
+            <h3 class="mb-sm">{{ file.filename }}</h3>
+            <p class="text-secondary">{{ (file.file_size).toFixed(2) }} MB</p>
           </div>
-          <div class="file-actions">
-            <button @click="playVideo(file)" class="btn-play">
+          <div class="flex gap-sm">
+            <button @click="playVideo(file)" class="btn btn-sm" style="background-color: var(--secondary); color: white;">
               播放
             </button>
-            <button @click="openAddToPlaylistModal(file)" class="btn-add">
+            <button @click="openAddToPlaylistModal(file)" class="btn btn-sm" style="background-color: var(--accent); color: white;">
               添加到歌单
             </button>
           </div>
@@ -270,19 +270,19 @@ function openAddToPlaylistModal(file) {
       </div>
       
       <!-- 视频播放器 -->
-      <div v-if="currentVideo" class="video-player">
-        <h3>{{ currentVideo.filename }}</h3>
+      <div v-if="currentVideo" class="card mt-lg p-lg">
+        <h3 class="mb-md">{{ currentVideo.filename }}</h3>
         <video 
           controls 
           @timeupdate="videoProgress = $event.target.currentTime" 
           @ended="updateVideoProgress"
           :src="`/api/files/download/${currentVideo.id}`"
           :currentTime="videoProgress"
-          style="width: 100%; max-width: 800px;"
+          style="width: 100%; max-width: 800px; border-radius: var(--radius-md);"
         ></video>
-        <div class="progress-info">
-          <p>当前进度: {{ videoProgress.toFixed(2) }} 秒</p>
-          <button @click="updateVideoProgress" class="btn-secondary">
+        <div class="flex justify-between items-center mt-md">
+          <p class="text-secondary">当前进度: {{ videoProgress.toFixed(2) }} 秒</p>
+          <button @click="updateVideoProgress" class="btn btn-sm btn-secondary">
             保存进度
           </button>
         </div>
@@ -290,25 +290,25 @@ function openAddToPlaylistModal(file) {
     </div>
     
     <!-- 歌单标签页 -->
-    <div v-if="activeTab === 'playlists'" class="playlists-container">
-      <h2>歌单列表</h2>
-      <div class="playlist-grid">
-        <div v-for="playlist in playlists" :key="playlist.id" class="playlist-card">
-          <h3 @click="viewPlaylist(playlist)">{{ playlist.name }}</h3>
-          <p>{{ playlist.description || '无描述' }}</p>
-          <p>{{ playlist.created_at }}</p>
+    <div v-if="activeTab === 'playlists'">
+      <h2 class="mb-md">歌单列表</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
+        <div v-for="playlist in playlists" :key="playlist.id" class="card cursor-pointer hover:shadow-lg transition-shadow" @click="viewPlaylist(playlist)">
+          <h3 class="mb-sm">{{ playlist.name }}</h3>
+          <p class="text-secondary mb-sm">{{ playlist.description || '无描述' }}</p>
+          <p class="text-light text-sm">{{ playlist.created_at }}</p>
         </div>
       </div>
       
       <!-- 歌单详情 -->
-      <div v-if="selectedPlaylist" class="playlist-detail">
-        <h3>{{ selectedPlaylist.name }}</h3>
-        <p>{{ selectedPlaylist.description || '无描述' }}</p>
-        <h4>歌单内容</h4>
-        <ul class="playlist-items">
-          <li v-for="item in selectedPlaylist.items" :key="item.id">
+      <div v-if="selectedPlaylist" class="card mt-lg">
+        <h3 class="mb-sm">{{ selectedPlaylist.name }}</h3>
+        <p class="text-secondary mb-md">{{ selectedPlaylist.description || '无描述' }}</p>
+        <h4 class="mb-md">歌单内容</h4>
+        <ul class="space-y-sm">
+          <li v-for="item in selectedPlaylist.items" :key="item.id" class="flex justify-between items-center p-sm border-b border-border">
             {{ item.filename }}
-            <button @click="removeFromPlaylist(selectedPlaylist.id, item.id)" class="btn-remove">
+            <button @click="removeFromPlaylist(selectedPlaylist.id, item.id)" class="btn btn-sm btn-danger">
               移除
             </button>
           </li>
@@ -319,13 +319,13 @@ function openAddToPlaylistModal(file) {
     <!-- 上传模态框 -->
     <div v-if="showUploadModal" class="modal">
       <div class="modal-content">
-        <h3>上传媒体文件</h3>
-        <input type="file" @change="uploadFile = $event.target.files[0]" accept="audio/*,video/*">
-        <div class="modal-actions">
-          <button @click="uploadMedia" class="btn-primary">
+        <h3 class="mb-md">上传媒体文件</h3>
+        <input type="file" @change="uploadFile = $event.target.files[0]" accept="audio/*,video/*" class="form-input mb-md">
+        <div class="flex justify-end gap-md">
+          <button @click="uploadMedia" class="btn btn-primary">
             上传
           </button>
-          <button @click="showUploadModal = false" class="btn-secondary">
+          <button @click="showUploadModal = false" class="btn btn-secondary">
             取消
           </button>
         </div>
@@ -335,14 +335,14 @@ function openAddToPlaylistModal(file) {
     <!-- 创建歌单模态框 -->
     <div v-if="showCreatePlaylistModal" class="modal">
       <div class="modal-content">
-        <h3>创建歌单</h3>
-        <input type="text" v-model="playlistName" placeholder="歌单名称">
-        <textarea v-model="playlistDescription" placeholder="歌单描述"></textarea>
-        <div class="modal-actions">
-          <button @click="createPlaylist" class="btn-primary">
+        <h3 class="mb-md">创建歌单</h3>
+        <input type="text" v-model="playlistName" placeholder="歌单名称" class="form-input mb-md">
+        <textarea v-model="playlistDescription" placeholder="歌单描述" class="form-input mb-md"></textarea>
+        <div class="flex justify-end gap-md">
+          <button @click="createPlaylist" class="btn btn-primary">
             创建
           </button>
-          <button @click="showCreatePlaylistModal = false" class="btn-secondary">
+          <button @click="showCreatePlaylistModal = false" class="btn btn-secondary">
             取消
           </button>
         </div>
@@ -352,17 +352,20 @@ function openAddToPlaylistModal(file) {
     <!-- 添加到歌单模态框 -->
     <div v-if="showAddToPlaylistModal" class="modal">
       <div class="modal-content">
-        <h3>添加到歌单</h3>
-        <p>选择要添加到的歌单:</p>
-        <div class="playlist-selector">
-          <div v-for="playlist in playlists" :key="playlist.id" class="playlist-option">
-            <button @click="addToPlaylist(playlist.id, selectedFileForPlaylist.id)" class="btn-secondary">
-              {{ playlist.name }}
-            </button>
-          </div>
+        <h3 class="mb-md">添加到歌单</h3>
+        <p class="mb-md">选择要添加到的歌单:</p>
+        <div class="space-y-sm mb-md">
+          <button 
+            v-for="playlist in playlists" 
+            :key="playlist.id" 
+            @click="addToPlaylist(playlist.id, selectedFileForPlaylist.id)" 
+            class="btn btn-secondary w-full text-left"
+          >
+            {{ playlist.name }}
+          </button>
         </div>
-        <div class="modal-actions">
-          <button @click="showAddToPlaylistModal = false" class="btn-secondary">
+        <div class="flex justify-end">
+          <button @click="showAddToPlaylistModal = false" class="btn btn-secondary">
             取消
           </button>
         </div>
@@ -375,245 +378,62 @@ function openAddToPlaylistModal(file) {
 .multimedia-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
-}
-
-h1 {
-  text-align: center;
-  margin-bottom: 30px;
 }
 
 .tabs {
   display: flex;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border);
 }
 
 .tabs button {
-  padding: 10px 20px;
+  padding: var(--spacing-sm) var(--spacing-lg);
   border: none;
   background: none;
   cursor: pointer;
-  font-size: 16px;
+  font-size: var(--font-size-base);
   border-bottom: 3px solid transparent;
+  transition: all var(--transition-fast);
 }
 
 .tabs button.active {
-  border-bottom-color: #4CAF50;
-  color: #4CAF50;
+  border-bottom-color: var(--primary);
+  color: var(--primary);
+  font-weight: 500;
 }
 
-.action-buttons {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.btn-primary {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.btn-secondary {
-  background-color: #f1f1f1;
-  color: #333;
-  border: 1px solid #ddd;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.btn-play {
-  background-color: #2196F3;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-right: 5px;
-}
-
-.btn-add {
-  background-color: #ff9800;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.btn-remove {
-  background-color: #f44336;
-  color: white;
-  border: none;
-  padding: 3px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-left: 10px;
-}
-
-.media-list {
-  margin-top: 20px;
-}
-
-.file-grid {
+.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
 }
 
-.file-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 15px;
-  background-color: #f9f9f9;
+.grid-cols-1 {
+  grid-template-columns: repeat(1, 1fr);
 }
 
-.file-info {
-  margin-bottom: 10px;
+@media (min-width: 768px) {
+  .md\:grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-.file-info h3 {
-  margin: 0 0 5px 0;
-  font-size: 16px;
+@media (min-width: 1024px) {
+  .lg\:grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
-.file-info p {
-  margin: 0;
-  font-size: 14px;
-  color: #666;
+.space-y-sm > * + * {
+  margin-top: var(--spacing-sm);
 }
 
-.file-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.now-playing {
-  margin-top: 30px;
-  padding: 15px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  background-color: #f0f8ff;
-}
-
-.video-player {
-  margin-top: 30px;
-  padding: 20px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-}
-
-.progress-info {
-  margin-top: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.playlists-container {
-  margin-top: 20px;
-}
-
-.playlist-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
-}
-
-.playlist-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 15px;
-  background-color: #f9f9f9;
+.cursor-pointer {
   cursor: pointer;
 }
 
-.playlist-card:hover {
-  background-color: #f0f0f0;
+.hover\:shadow-lg:hover {
+  box-shadow: var(--shadow-lg);
 }
 
-.playlist-detail {
-  margin-top: 30px;
-  padding: 20px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-}
-
-.playlist-items {
-  list-style: none;
-  padding: 0;
-  margin: 10px 0 0 0;
-}
-
-.playlist-items li {
-  padding: 10px;
-  border-bottom: 1px solid #e0e0e0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 400px;
-  max-width: 90%;
-}
-
-.modal-content h3 {
-  margin-top: 0;
-}
-
-.modal-content input,
-.modal-content textarea {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-.modal-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  margin-top: 20px;
-}
-
-.playlist-selector {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 10px 0;
-}
-
-.playlist-option button {
-  width: 100%;
-  text-align: left;
+.transition-shadow {
+  transition: box-shadow var(--transition-normal);
 }
 </style>
