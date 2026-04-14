@@ -36,7 +36,7 @@ const editUser = ref({
 async function fetchUsers() {
   try {
     loading.value = true
-    const response = await api.get('/users/')
+    const response = await api.get('/users')
     users.value = response.data
   } catch (err) {
     error.value = '获取用户列表失败'
@@ -74,7 +74,7 @@ async function updateUser() {
   }
   
   try {
-    await api.put(`/users/${editUser.value.id}/`, editUser.value)
+    await api.put(`/users/${editUser.value.id}`, editUser.value)
     await fetchUsers()
     showEditModal.value = false
     editUser.value = { id: '', username: '', email: '', nickname: '', is_admin: false, is_active: true }
@@ -107,7 +107,7 @@ async function deleteUser(userId) {
   if (!confirm('确定要删除这个用户吗？')) return
   
   try {
-    await api.delete(`/users/${userId}/`)
+    await api.delete(`/users/${userId}`)
     users.value = users.value.filter(user => user.id !== userId)
   } catch (err) {
     error.value = '删除用户失败'
@@ -125,7 +125,7 @@ async function deleteSelectedUsers() {
   if (!confirm(`确定要删除选中的 ${selectedUsers.value.length} 个用户吗？`)) return
   
   try {
-    await Promise.all(selectedUsers.value.map(userId => api.delete(`/users/${userId}/`)))
+    await Promise.all(selectedUsers.value.map(userId => api.delete(`/users/${userId}`)))
     await fetchUsers()
     selectedUsers.value = []
   } catch (err) {

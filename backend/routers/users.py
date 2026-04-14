@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from pydantic import BaseModel
 from datetime import datetime
-from db.models import User
+from db.models import User, File, Share, ChatRecord, Playlist, PlaylistItem, VideoProgress, Notification
 from main import get_db
 from routers.auth import get_current_active_user
 
@@ -134,6 +134,35 @@ async def delete_user(
             detail="用户不存在"
         )
     
+    # 删除所有关联的数据
+    # 删除通知
+    db.query(Notification).filter(Notification.user_id == user_id).delete()
+    
+    # 删除视频进度
+    db.query(VideoProgress).filter(VideoProgress.user_id == user_id).delete()
+    
+    # 删除歌单项
+    playlists = db.query(Playlist).filter(Playlist.user_id == user_id).all()
+    for playlist in playlists:
+        db.query(PlaylistItem).filter(PlaylistItem.playlist_id == playlist.id).delete()
+    
+    # 删除歌单
+    db.query(Playlist).filter(Playlist.user_id == user_id).delete()
+    
+    # 删除聊天记录
+    db.query(ChatRecord).filter(
+        (ChatRecord.sender_id == user_id) | (ChatRecord.receiver_id == user_id)
+    ).delete()
+    
+    # 删除共享
+    db.query(Share).filter(
+        (Share.creator_id == user_id) | (Share.receiver_id == user_id)
+    ).delete()
+    
+    # 删除文件
+    db.query(File).filter(File.user_id == user_id).delete()
+    
+    # 删除用户
     db.delete(user)
     db.commit()
     return {"message": "用户删除成功"}
