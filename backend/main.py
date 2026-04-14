@@ -35,11 +35,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 挂载静态文件
-frontend_dist_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist")
-if os.path.exists(frontend_dist_path):
-    app.mount("/", StaticFiles(directory=frontend_dist_path, html=True), name="frontend")
-
 # 依赖项
 def get_db():
     db = SessionLocal()
@@ -64,3 +59,22 @@ app.include_router(notification.router, prefix="/api/notification", tags=["通�
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
+
+# 挂载静态文件（必须在路由之后，否则会覆盖API路由）
+frontend_dist_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist")
+if os.path.exists(frontend_dist_path):
+    # 为前端静态文件创建单独的挂载，使用通配符处理路由
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        # 如果是API路径，不处理
+        if full_path.startswith("api") or full_path == "health":
+            return {"detail": "Not Found"}
+        # 否则返回前端文件
+        file_path = os.path.join(frontend_dist_path, full_path)
+        if os.path.exists(file_path) and os.path.isfile(file_path):
+            return FileResponse(file_path)
+        else:
+            # 如果文件不存在，返回index.html，让前端处理路由
+            return FileResponse(os.path.join(frontend_dist_path, "index.html"))
+    # 另外挂载静态文件用于直接访问
+    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dist_path, "assets")), name="frontend-assets")

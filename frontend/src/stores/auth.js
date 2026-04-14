@@ -1,6 +1,14 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 
+// 配置axios基础URL
+const api = axios.create({
+  baseURL: '/api',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
@@ -19,7 +27,7 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true
       this.error = null
       try {
-        const response = await axios.post('http://localhost:8000/api/auth/login/json', {
+        const response = await api.post('/auth/login/json', {
           username,
           password
         })
@@ -39,7 +47,7 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true
       this.error = null
       try {
-        const response = await axios.post('http://localhost:8000/api/auth/register', {
+        const response = await api.post('/auth/register', {
           username,
           password,
           email
@@ -63,7 +71,7 @@ export const useAuthStore = defineStore('auth', {
       if (!this.token) return
       this.loading = true
       try {
-        const response = await axios.get('http://localhost:8000/api/auth/me', {
+        const response = await api.get('/auth/me', {
           headers: {
             Authorization: `Bearer ${this.token}`
           }
