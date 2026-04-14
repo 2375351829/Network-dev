@@ -119,7 +119,7 @@ function copyLink(link) {
         </thead>
         <tbody>
           <tr v-for="share in shareStore.shares" :key="share.id">
-            <td>{{ share.file.filename }}</td>
+            <td>{{ share.file?.filename || '未知文件' }}</td>
             <td class="flex items-center gap-sm">
               <span class="flex-1 text-sm break-all">{{ share.share_url }}</span>
               <button @click="copyLink(share.share_url)" class="btn btn-sm btn-secondary">复制</button>

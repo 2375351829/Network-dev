@@ -49,7 +49,7 @@ function scrollToBottom() {
       <div class="messages-container" ref="messagesContainer">
         <div v-for="message in chatStore.messages" :key="message.id" class="message">
           <div class="message-header">
-            <span class="message-username">{{ message.user.username }}</span>
+            <span class="message-username">{{ message.user?.username || '未知用户' }}</span>
             <span class="message-time">{{ new Date(message.created_at).toLocaleString() }}</span>
           </div>
           <div class="message-content">{{ message.content }}</div>
