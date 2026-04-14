@@ -9,12 +9,13 @@ const authStore = useAuthStore()
 const username = ref('')
 const password = ref('')
 const email = ref('')
+const nickname = ref('')
 const error = ref('')
 
 async function handleRegister() {
   error.value = ''
   try {
-    await authStore.register(username.value, password.value, email.value)
+    await authStore.register(username.value, password.value, email.value, nickname.value)
     router.push('/login')
   } catch (err) {
     error.value = authStore.error || '注册失败'
@@ -37,6 +38,17 @@ async function handleRegister() {
             class="form-input"
             required 
             placeholder="请输入用户名"
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="nickname" class="form-label">昵称</label>
+          <input 
+            type="text" 
+            id="nickname" 
+            v-model="nickname" 
+            class="form-input"
+            placeholder="请输入昵称（可选）"
           />
         </div>
         

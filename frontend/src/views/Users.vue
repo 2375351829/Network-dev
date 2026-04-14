@@ -19,14 +19,17 @@ const showUserDetail = ref(false)
 const newUser = ref({
   username: '',
   email: '',
-  password: ''
+  password: '',
+  nickname: ''
 })
 
 const editUser = ref({
   id: '',
   username: '',
   email: '',
-  role: 'user'
+  nickname: '',
+  is_admin: false,
+  is_active: true
 })
 
 // 获取用户列表
@@ -52,10 +55,10 @@ async function addUser() {
   
   try {
     // 使用注册功能添加用户
-    await authStore.register(newUser.value.username, newUser.value.password, newUser.value.email)
+    await authStore.register(newUser.value.username, newUser.value.password, newUser.value.email, newUser.value.nickname)
     await fetchUsers()
     showAddModal.value = false
-    newUser.value = { username: '', email: '', password: '' }
+    newUser.value = { username: '', email: '', password: '', nickname: '' }
     error.value = ''
   } catch (err) {
     error.value = '添加用户失败'
@@ -74,7 +77,7 @@ async function updateUser() {
     await api.put(`/users/${editUser.value.id}`, editUser.value)
     await fetchUsers()
     showEditModal.value = false
-    editUser.value = { id: '', username: '', email: '' }
+    editUser.value = { id: '', username: '', email: '', nickname: '', is_admin: false, is_active: true }
     error.value = ''
   } catch (err) {
     error.value = '更新用户失败'
@@ -85,8 +88,10 @@ async function updateUser() {
 // 打开编辑模态框
 function openEditModal(user) {
   editUser.value = { 
-    ...user, 
-    role: user.role || 'user' 
+    ...user,
+    nickname: user.nickname || user.username,
+    is_admin: user.is_admin || false,
+    is_active: user.is_active !== undefined ? user.is_active : true
   }
   showEditModal.value = true
 }
@@ -132,10 +137,10 @@ async function deleteSelectedUsers() {
 // 导出用户信息
 function exportUsers() {
   const csvContent = users.value.map(user => 
-    `${user.id},${user.username},${user.email},${user.role || 'user'},${user.created_at}`
+    `${user.id},${user.username},${user.nickname || user.username},${user.email},${user.is_admin ? '管理员' : '普通用户'},${user.created_at}`
   ).join('\n')
   
-  const header = 'ID,用户名,邮箱,角色,创建时间\n'
+  const header = 'ID,用户名,昵称,邮箱,角色,创建时间\n'
   const blob = new Blob([header + csvContent], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
@@ -206,6 +211,7 @@ onMounted(() => {
             </th>
             <th>ID</th>
             <th>用户名</th>
+            <th>昵称</th>
             <th>邮箱</th>
             <th>角色</th>
             <th>创建时间</th>
@@ -223,10 +229,11 @@ onMounted(() => {
             </td>
             <td>{{ user.id }}</td>
             <td>{{ user.username }}</td>
+            <td>{{ user.nickname || user.username }}</td>
             <td>{{ user.email }}</td>
             <td>
-              <span class="tag" :class="user.role === 'admin' ? 'tag-primary' : 'tag-secondary'">
-                {{ user.role === 'admin' ? '管理员' : '普通用户' }}
+              <span class="tag" :class="user.is_admin ? 'tag-primary' : 'tag-secondary'">
+                {{ user.is_admin ? '管理员' : '普通用户' }}
               </span>
             </td>
             <td>{{ new Date(user.created_at).toLocaleString() }}</td>
@@ -260,6 +267,10 @@ onMounted(() => {
           <input id="new-username" v-model="newUser.username" type="text" class="form-input" placeholder="请输入用户名" />
         </div>
         <div class="form-group mb-md">
+          <label for="new-nickname" class="form-label">昵称</label>
+          <input id="new-nickname" v-model="newUser.nickname" type="text" class="form-input" placeholder="请输入昵称（可选）" />
+        </div>
+        <div class="form-group mb-md">
           <label for="new-email" class="form-label">邮箱</label>
           <input id="new-email" v-model="newUser.email" type="email" class="form-input" placeholder="请输入邮箱" />
         </div>
@@ -287,14 +298,25 @@ onMounted(() => {
           <input id="edit-username" v-model="editUser.username" type="text" class="form-input" placeholder="请输入用户名" />
         </div>
         <div class="form-group mb-md">
+          <label for="edit-nickname" class="form-label">昵称</label>
+          <input id="edit-nickname" v-model="editUser.nickname" type="text" class="form-input" placeholder="请输入昵称" />
+        </div>
+        <div class="form-group mb-md">
           <label for="edit-email" class="form-label">邮箱</label>
           <input id="edit-email" v-model="editUser.email" type="email" class="form-input" placeholder="请输入邮箱" />
         </div>
         <div class="form-group mb-md">
           <label for="edit-role" class="form-label">用户角色</label>
-          <select id="edit-role" v-model="editUser.role" class="form-input">
-            <option value="user">普通用户</option>
-            <option value="admin">管理员</option>
+          <select id="edit-role" v-model="editUser.is_admin" class="form-input">
+            <option :value="false">普通用户</option>
+            <option :value="true">管理员</option>
+          </select>
+        </div>
+        <div class="form-group mb-md">
+          <label for="edit-active" class="form-label">账户状态</label>
+          <select id="edit-active" v-model="editUser.is_active" class="form-input">
+            <option :value="true">激活</option>
+            <option :value="false">禁用</option>
           </select>
         </div>
         <div class="flex justify-end gap-md">
@@ -315,10 +337,16 @@ onMounted(() => {
         <div class="mb-md">
           <p class="mb-sm"><strong>ID:</strong> {{ selectedUser.id }}</p>
           <p class="mb-sm"><strong>用户名:</strong> {{ selectedUser.username }}</p>
+          <p class="mb-sm"><strong>昵称:</strong> {{ selectedUser.nickname || selectedUser.username }}</p>
           <p class="mb-sm"><strong>邮箱:</strong> {{ selectedUser.email }}</p>
           <p class="mb-sm"><strong>角色:</strong> 
-            <span class="tag" :class="selectedUser.role === 'admin' ? 'tag-primary' : 'tag-secondary'">
-              {{ selectedUser.role === 'admin' ? '管理员' : '普通用户' }}
+            <span class="tag" :class="selectedUser.is_admin ? 'tag-primary' : 'tag-secondary'">
+              {{ selectedUser.is_admin ? '管理员' : '普通用户' }}
+            </span>
+          </p>
+          <p class="mb-sm"><strong>账户状态:</strong> 
+            <span class="tag" :class="selectedUser.is_active ? 'tag-primary' : 'tag-danger'">
+              {{ selectedUser.is_active ? '激活' : '禁用' }}
             </span>
           </p>
           <p class="mb-sm"><strong>创建时间:</strong> {{ new Date(selectedUser.created_at).toLocaleString() }}</p>

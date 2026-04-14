@@ -34,11 +34,18 @@ async function fetchMediaFiles() {
   try {
     // 先尝试从files store获取文件，再筛选媒体文件
     const filesResponse = await api.get('/files')
-    const allFiles = filesResponse.data || []
+    let allFiles = []
+    
+    // 确保allFiles是数组
+    if (Array.isArray(filesResponse.data)) {
+      allFiles = filesResponse.data
+    } else if (filesResponse.data && Array.isArray(filesResponse.data.files)) {
+      allFiles = filesResponse.data.files
+    }
     
     // 简单的文件类型判断
     musicFiles.value = allFiles.filter(file => 
-      file.filename && (file.filename.toLowerCase().endsWith('.mp3') || 
+      file && file.filename && (file.filename.toLowerCase().endsWith('.mp3') || 
                         file.filename.toLowerCase().endsWith('.wav') || 
                         file.filename.toLowerCase().endsWith('.flac') ||
                         file.filename.toLowerCase().endsWith('.aac') ||
@@ -46,7 +53,7 @@ async function fetchMediaFiles() {
     )
     
     videoFiles.value = allFiles.filter(file => 
-      file.filename && (file.filename.toLowerCase().endsWith('.mp4') || 
+      file && file.filename && (file.filename.toLowerCase().endsWith('.mp4') || 
                         file.filename.toLowerCase().endsWith('.avi') || 
                         file.filename.toLowerCase().endsWith('.mov') ||
                         file.filename.toLowerCase().endsWith('.mkv') ||

@@ -44,9 +44,10 @@ def get_db():
         db.close()
 
 # 导入路由
-from routers import auth, files, shares, chat, multimedia, backup, lan_broadcast, notification
+from routers import auth, files, shares, chat, multimedia, backup, lan_broadcast, notification, users
 
 app.include_router(auth.router, prefix="/api/auth", tags=["认证"])
+app.include_router(users.router, prefix="/api/users", tags=["用户管理"])
 app.include_router(files.router, prefix="/api/files", tags=["文件管理"])
 app.include_router(shares.router, prefix="/api/shares", tags=["共享管理"])
 app.include_router(chat.router, prefix="/api/chat", tags=["聊天"])
