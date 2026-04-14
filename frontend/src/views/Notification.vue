@@ -56,7 +56,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
+import api from '../utils/api'
 
 const notifications = ref([])
 const loading = ref(true)
@@ -88,7 +88,7 @@ const getTypeLabel = (type) => {
 const getNotifications = async () => {
   try {
     loading.value = true
-    const response = await axios.get('/api/notification/')
+    const response = await api.get('/notification/')
     notifications.value = response.data
   } catch (error) {
     console.error('获取通知失败:', error)
@@ -100,7 +100,7 @@ const getNotifications = async () => {
 // 标记为已读
 const markAsRead = async (id) => {
   try {
-    await axios.put(`/api/notification/${id}`, { is_read: true })
+    await api.put(`/notification/${id}`, { is_read: true })
     // 更新本地状态
     const notification = notifications.value.find(n => n.id === id)
     if (notification) {
@@ -114,7 +114,7 @@ const markAsRead = async (id) => {
 // 标记所有为已读
 const markAllAsRead = async () => {
   try {
-    await axios.put('/api/notification/read-all')
+    await api.put('/notification/read-all')
     // 更新本地状态
     notifications.value.forEach(n => {
       n.is_read = true
@@ -129,7 +129,7 @@ const deleteNotification = async (id) => {
   if (!confirm('确定要删除这条通知吗？')) return
   
   try {
-    await axios.delete(`/api/notification/${id}`)
+    await api.delete(`/notification/${id}`)
     // 更新本地状态
     notifications.value = notifications.value.filter(n => n.id !== id)
   } catch (error) {
@@ -142,7 +142,7 @@ const deleteAll = async () => {
   if (!confirm('确定要删除所有通知吗？')) return
   
   try {
-    await axios.delete('/api/notification/delete-all')
+    await api.delete('/notification/delete-all')
     // 清空本地状态
     notifications.value = []
   } catch (error) {

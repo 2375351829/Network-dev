@@ -79,7 +79,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import api from '../utils/api'
 
 const backupStatus = ref({})
 const config = ref({
@@ -108,7 +108,7 @@ const formatSize = (size) => {
 // 获取备份状态
 const getBackupStatus = async () => {
   try {
-    const response = await axios.get('/api/backup/status')
+    const response = await api.get('/backup/status')
     backupStatus.value = response.data
   } catch (error) {
     console.error('获取备份状态失败:', error)
@@ -118,7 +118,7 @@ const getBackupStatus = async () => {
 // 获取备份配置
 const getBackupConfig = async () => {
   try {
-    const response = await axios.get('/api/backup/config')
+    const response = await api.get('/backup/config')
     config.value = response.data
   } catch (error) {
     console.error('获取备份配置失败:', error)
@@ -128,7 +128,7 @@ const getBackupConfig = async () => {
 // 获取备份历史
 const getBackups = async () => {
   try {
-    const response = await axios.get('/api/backup/list')
+    const response = await api.get('/backup/list')
     backups.value = response.data
   } catch (error) {
     console.error('获取备份历史失败:', error)
@@ -138,7 +138,7 @@ const getBackups = async () => {
 // 更新备份配置
 const updateConfig = async () => {
   try {
-    await axios.post('/api/backup/config', config.value)
+    await api.post('/backup/config', config.value)
     alert('配置更新成功')
   } catch (error) {
     console.error('更新备份配置失败:', error)
@@ -149,7 +149,7 @@ const updateConfig = async () => {
 // 手动执行备份
 const runBackup = async () => {
   try {
-    await axios.post('/api/backup/run')
+    await api.post('/backup/run')
     alert('备份已开始')
     // 刷新状态
     setTimeout(getBackupStatus, 1000)

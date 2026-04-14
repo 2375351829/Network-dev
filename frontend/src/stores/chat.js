@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import api from '../utils/api'
 
 export const useChatStore = defineStore('chat', {
   state: () => ({
@@ -13,12 +13,7 @@ export const useChatStore = defineStore('chat', {
       this.loading = true
       this.error = null
       try {
-        const token = localStorage.getItem('token')
-        const response = await axios.get('http://localhost:8000/api/chat/messages', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
+        const response = await api.get('/chat/messages')
         this.messages = response.data
         return response.data
       } catch (error) {
@@ -33,13 +28,8 @@ export const useChatStore = defineStore('chat', {
       this.loading = true
       this.error = null
       try {
-        const token = localStorage.getItem('token')
-        const response = await axios.post('http://localhost:8000/api/chat/messages', {
+        const response = await api.post('/chat/messages', {
           content
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
         })
         this.messages.push(response.data)
         return response.data

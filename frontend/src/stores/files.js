@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import api from '../utils/api'
 
 export const useFilesStore = defineStore('files', {
   state: () => ({
@@ -13,12 +13,7 @@ export const useFilesStore = defineStore('files', {
       this.loading = true
       this.error = null
       try {
-        const token = localStorage.getItem('token')
-        const response = await axios.get('http://localhost:8000/api/files', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
+        const response = await api.get('/files')
         this.files = response.data
         return response.data
       } catch (error) {
@@ -33,12 +28,10 @@ export const useFilesStore = defineStore('files', {
       this.loading = true
       this.error = null
       try {
-        const token = localStorage.getItem('token')
         const formData = new FormData()
         formData.append('file', file)
-        const response = await axios.post('http://localhost:8000/api/files/upload', formData, {
+        const response = await api.post('/files/upload', formData, {
           headers: {
-            Authorization: `Bearer ${token}`,
             'Content-Type': 'multipart/form-data'
           }
         })
@@ -56,12 +49,7 @@ export const useFilesStore = defineStore('files', {
       this.loading = true
       this.error = null
       try {
-        const token = localStorage.getItem('token')
-        await axios.delete(`http://localhost:8000/api/files/${fileId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
+        await api.delete(`/files/${fileId}`)
         this.files = this.files.filter(file => file.id !== fileId)
       } catch (error) {
         this.error = error.response?.data?.detail || '删除文件失败'
@@ -75,13 +63,8 @@ export const useFilesStore = defineStore('files', {
       this.loading = true
       this.error = null
       try {
-        const token = localStorage.getItem('token')
-        const response = await axios.put(`http://localhost:8000/api/files/${fileId}`, {
+        const response = await api.put(`/files/${fileId}`, {
           filename: newName
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
         })
         const index = this.files.findIndex(file => file.id === fileId)
         if (index !== -1) {
@@ -98,11 +81,7 @@ export const useFilesStore = defineStore('files', {
     
     async downloadFile(fileId) {
       try {
-        const token = localStorage.getItem('token')
-        const response = await axios.get(`http://localhost:8000/api/files/user/download/${fileId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          },
+        const response = await api.get(`/files/user/download/${fileId}`, {
           responseType: 'blob'
         })
         const url = window.URL.createObjectURL(new Blob([response.data]))
@@ -120,12 +99,7 @@ export const useFilesStore = defineStore('files', {
     
     async editFile(fileId) {
       try {
-        const token = localStorage.getItem('token')
-        const response = await axios.get(`http://localhost:8000/api/files/${fileId}/edit`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
+        const response = await api.get(`/files/${fileId}/edit`)
         return response.data
       } catch (error) {
         this.error = error.response?.data?.detail || '获取编辑配置失败'

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import api from '../utils/api'
 
 export const useShareStore = defineStore('share', {
   state: () => ({
@@ -13,12 +13,7 @@ export const useShareStore = defineStore('share', {
       this.loading = true
       this.error = null
       try {
-        const token = localStorage.getItem('token')
-        const response = await axios.get('http://localhost:8000/api/shares', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
+        const response = await api.get('/shares')
         this.shares = response.data
         return response.data
       } catch (error) {
@@ -33,14 +28,9 @@ export const useShareStore = defineStore('share', {
       this.loading = true
       this.error = null
       try {
-        const token = localStorage.getItem('token')
-        const response = await axios.post('http://localhost:8000/api/shares', {
+        const response = await api.post('/shares', {
           file_id: fileId,
           expires_at: expiresAt
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
         })
         this.shares.push(response.data)
         return response.data
@@ -56,12 +46,7 @@ export const useShareStore = defineStore('share', {
       this.loading = true
       this.error = null
       try {
-        const token = localStorage.getItem('token')
-        await axios.delete(`http://localhost:8000/api/shares/${shareId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
+        await api.delete(`/shares/${shareId}`)
         this.shares = this.shares.filter(share => share.id !== shareId)
       } catch (error) {
         this.error = error.response?.data?.detail || '删除共享失败'

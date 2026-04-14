@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import api from '../utils/api'
 
 // 状态管理
 const activeTab = ref('music') // music, video, playlists
@@ -30,10 +30,10 @@ onMounted(() => {
 // 获取媒体文件列表
 async function fetchMediaFiles() {
   try {
-    const musicResponse = await axios.get('/api/multimedia/list?media_type=audio')
+    const musicResponse = await api.get('/multimedia/list?media_type=audio')
     musicFiles.value = musicResponse.data
     
-    const videoResponse = await axios.get('/api/multimedia/list?media_type=video')
+    const videoResponse = await api.get('/multimedia/list?media_type=video')
     videoFiles.value = videoResponse.data
   } catch (error) {
     console.error('获取媒体文件失败:', error)
@@ -43,7 +43,7 @@ async function fetchMediaFiles() {
 // 获取歌单列表
 async function fetchPlaylists() {
   try {
-    const response = await axios.get('/api/multimedia/playlists')
+    const response = await api.get('/multimedia/playlists')
     playlists.value = response.data
   } catch (error) {
     console.error('获取歌单失败:', error)
@@ -58,7 +58,7 @@ async function uploadMedia() {
   formData.append('file', uploadFile.value)
   
   try {
-    await axios.post('/api/multimedia/upload', formData, {
+    await api.post('/multimedia/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -78,7 +78,7 @@ async function createPlaylist() {
   if (!playlistName.value) return
   
   try {
-    await axios.post('/api/multimedia/playlists', {
+    await api.post('/multimedia/playlists', {
       name: playlistName.value,
       description: playlistDescription.value
     }, {
@@ -100,7 +100,7 @@ async function createPlaylist() {
 // 查看歌单详情
 async function viewPlaylist(playlist) {
   try {
-    const response = await axios.get(`/api/multimedia/playlists/${playlist.id}`)
+    const response = await api.get(`/multimedia/playlists/${playlist.id}`)
     selectedPlaylist.value = response.data
   } catch (error) {
     console.error('获取歌单详情失败:', error)
@@ -110,7 +110,7 @@ async function viewPlaylist(playlist) {
 // 添加歌曲到歌单
 async function addToPlaylist(playlistId, fileId) {
   try {
-    await axios.post(`/api/multimedia/playlists/${playlistId}/items`, {
+    await api.post(`/multimedia/playlists/${playlistId}/items`, {
       file_id: fileId
     }, {
       headers: {
@@ -131,7 +131,7 @@ async function addToPlaylist(playlistId, fileId) {
 // 从歌单中移除歌曲
 async function removeFromPlaylist(playlistId, itemId) {
   try {
-    await axios.delete(`/api/multimedia/playlists/${playlistId}/items/${itemId}`)
+    await api.delete(`/multimedia/playlists/${playlistId}/items/${itemId}`)
     
     // 重新获取歌单详情
     if (selectedPlaylist.value && selectedPlaylist.value.id === playlistId) {
@@ -155,7 +155,7 @@ async function playVideo(file) {
   
   // 获取视频进度
   try {
-    const response = await axios.get(`/api/multimedia/video-progress/${file.id}`)
+    const response = await api.get(`/multimedia/video-progress/${file.id}`)
     videoProgress.value = response.data.progress
   } catch (error) {
     console.error('获取视频进度失败:', error)
@@ -167,7 +167,7 @@ async function updateVideoProgress() {
   if (!currentVideo.value) return
   
   try {
-    await axios.post(`/api/multimedia/video-progress/${currentVideo.value.id}`, {
+    await api.post(`/multimedia/video-progress/${currentVideo.value.id}`, {
       progress: videoProgress.value
     }, {
       headers: {
