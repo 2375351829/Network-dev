@@ -1,13 +1,5 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
-
-// 配置axios基础URL
-const api = axios.create({
-  baseURL: '/api',
-  headers: {
-    'Content-Type': 'application/json'
-  }
-})
+import api from '../utils/api'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
