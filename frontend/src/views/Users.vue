@@ -2,8 +2,10 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../utils/api'
+import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const users = ref([])
 const loading = ref(true)
 const error = ref('')
@@ -23,7 +25,8 @@ const newUser = ref({
 const editUser = ref({
   id: '',
   username: '',
-  email: ''
+  email: '',
+  role: 'user'
 })
 
 // 获取用户列表
@@ -48,7 +51,8 @@ async function addUser() {
   }
   
   try {
-    await api.post('/users', newUser.value)
+    // 使用注册功能添加用户
+    await authStore.register(newUser.value.username, newUser.value.password, newUser.value.email)
     await fetchUsers()
     showAddModal.value = false
     newUser.value = { username: '', email: '', password: '' }
@@ -80,7 +84,10 @@ async function updateUser() {
 
 // 打开编辑模态框
 function openEditModal(user) {
-  editUser.value = { ...user }
+  editUser.value = { 
+    ...user, 
+    role: user.role || 'user' 
+  }
   showEditModal.value = true
 }
 
@@ -125,10 +132,10 @@ async function deleteSelectedUsers() {
 // 导出用户信息
 function exportUsers() {
   const csvContent = users.value.map(user => 
-    `${user.id},${user.username},${user.email},${user.created_at}`
+    `${user.id},${user.username},${user.email},${user.role || 'user'},${user.created_at}`
   ).join('\n')
   
-  const header = 'ID,用户名,邮箱,创建时间\n'
+  const header = 'ID,用户名,邮箱,角色,创建时间\n'
   const blob = new Blob([header + csvContent], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
@@ -200,6 +207,7 @@ onMounted(() => {
             <th>ID</th>
             <th>用户名</th>
             <th>邮箱</th>
+            <th>角色</th>
             <th>创建时间</th>
             <th>操作</th>
           </tr>
@@ -216,6 +224,11 @@ onMounted(() => {
             <td>{{ user.id }}</td>
             <td>{{ user.username }}</td>
             <td>{{ user.email }}</td>
+            <td>
+              <span class="tag" :class="user.role === 'admin' ? 'tag-primary' : 'tag-secondary'">
+                {{ user.role === 'admin' ? '管理员' : '普通用户' }}
+              </span>
+            </td>
             <td>{{ new Date(user.created_at).toLocaleString() }}</td>
             <td class="flex gap-sm">
               <button @click="openUserDetail(user)" class="btn btn-sm" style="background-color: var(--secondary); color: white;">
@@ -277,6 +290,13 @@ onMounted(() => {
           <label for="edit-email" class="form-label">邮箱</label>
           <input id="edit-email" v-model="editUser.email" type="email" class="form-input" placeholder="请输入邮箱" />
         </div>
+        <div class="form-group mb-md">
+          <label for="edit-role" class="form-label">用户角色</label>
+          <select id="edit-role" v-model="editUser.role" class="form-input">
+            <option value="user">普通用户</option>
+            <option value="admin">管理员</option>
+          </select>
+        </div>
         <div class="flex justify-end gap-md">
           <button @click="updateUser" class="btn btn-primary">
             保存
@@ -296,6 +316,11 @@ onMounted(() => {
           <p class="mb-sm"><strong>ID:</strong> {{ selectedUser.id }}</p>
           <p class="mb-sm"><strong>用户名:</strong> {{ selectedUser.username }}</p>
           <p class="mb-sm"><strong>邮箱:</strong> {{ selectedUser.email }}</p>
+          <p class="mb-sm"><strong>角色:</strong> 
+            <span class="tag" :class="selectedUser.role === 'admin' ? 'tag-primary' : 'tag-secondary'">
+              {{ selectedUser.role === 'admin' ? '管理员' : '普通用户' }}
+            </span>
+          </p>
           <p class="mb-sm"><strong>创建时间:</strong> {{ new Date(selectedUser.created_at).toLocaleString() }}</p>
         </div>
         <div class="flex justify-end">
