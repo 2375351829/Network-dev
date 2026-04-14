@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from db.models import Base
@@ -33,6 +35,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 挂载静态文件
+frontend_dist_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist")
+if os.path.exists(frontend_dist_path):
+    app.mount("/", StaticFiles(directory=frontend_dist_path, html=True), name="frontend")
+
 # 依赖项
 def get_db():
     db = SessionLocal()
@@ -52,11 +59,6 @@ app.include_router(multimedia.router, prefix="/api/multimedia", tags=["多媒体
 app.include_router(backup.router, prefix="/api/backup", tags=["备份"])
 app.include_router(lan_broadcast.router, prefix="/api/lan-broadcast", tags=["局域网广播"])
 app.include_router(notification.router, prefix="/api/notification", tags=["通知"])
-
-# 根路径
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to LanFileHub API"}
 
 # 健康检查
 @app.get("/health")
